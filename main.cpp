@@ -7,62 +7,35 @@ using namespace std;
 
 
 int main(){
-    string filename = "gpt_128.dd";
-    ifstream fin;
-    fin.open(filename, ios::binary);
-    uint8_t number;
+    ifstream file;
+    string filename="gpt_128.dd";
+    file.open(filename, ios::binary);
 
-    
-    if(!fin) {
-        printf("파일을 열 수 없습니다.");
-        return 1;
+    if (!file.is_open()){
+        printf("%s","error opening the file");
     }
 
     /*
         reinterpret_cast는 형변환 연산자로 
     */
+    //move the file pointer forward by 400 bytes 
 
-    uint8_t FLBA[8];
-    uint8_t LLBA[8];
+    file.seekg(1024,ios::beg);
+
+    uint8_t number;
     int i = 0;
     int f = 0;
-    while(fin.read(reinterpret_cast<char*>(&number), sizeof(number))){
-     
-        if (i >= 1056 && i < 1056 + 8){
-            if (i == 1056){
-                printf("First LBA\n");
-            }
-            FLBA[f] = number;
-            //printf("%02x",FLBA[f]);
-            printf("%02x ",number);
-            f += 1;
-        }
-
-
-        f = 0;
-        if (i >= 1056+8 && i < 1056 + 16){
-            if (i == 1064){
-                printf("\nLast LBA\n");
-            }
-            LLBA[f] = number;
-            printf("%02x ",number);
-            f++;
-        }
-      
-
-        if (i == 1072){
-            printf("\n");
+    while(file.read(reinterpret_cast<char*>(&number), sizeof(number))){
+        
+        printf("%0x",number);
+        if(i == 50){
             break;
         }
-
         i++;
-    };
+    }
 
 
-
-
-
-    fin.close();
+    file.close();
     return -1;
 
 }
