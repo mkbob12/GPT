@@ -10,27 +10,27 @@
 using namespace std;
 
 
-
-
-
-// === 초기화 
-
+// ================================== 초기화 ========================================
 
 int i = 0;
 int f = 0;
 int j = 0; 
 
 
-int file(int x){
+bool file(int x){
     ifstream file;
     string filename="gpt_128.dd";
     file.open(filename, ios::binary);
-    cout<<"x" << x <<endl;
-    file.seekg(x,ios::beg);
+    file.seekg(x, ios::beg);
+
 
     uint16_t number;
     uint32_t bit; 
+    uint64_t numbers;
     bool type  = true;
+    int zero_count = 0;
+
+// ============================== 파일 읽기 선언 =====================================
     while(file.read(reinterpret_cast<char *>(&number), sizeof(number))){
        
         if(i >= 0 & i <8){
@@ -40,8 +40,19 @@ int file(int x){
                 
             }
             printf("%04x ",number);
+            if(number == 0){
+                zero_count += 1;
+            }
         }
-        
+
+// ============================== GUID가 0 이면 break ============================
+        if(zero_count == 8){
+            return true;
+
+        }
+
+
+
         if(i >= 8 && i < 16){
             if( i ==  8){
                 printf("%s","\nUnique Parition GUID\n");
@@ -61,7 +72,10 @@ int file(int x){
             uint64_t size;
             j = 0;
             string utf8String;
+
+//===================== FLBA LLBA 차이의 사이즈 , real_address ,Decoded UTF - 8 구하기 ===============================
             while(file1.read(reinterpret_cast<char *>(&number64), sizeof(number64))){
+                
                 if (j == 0){
                     printf("%s","\nFLBA ");
                     printf("%016lx ", number64);
@@ -85,12 +99,12 @@ int file(int x){
                         unsigned char byte = (number64 >> (i * 8)) & 0xFF;
                         utf8String.push_back(byte);
                     }
+
                     string reverseString; 
                     for (int i = utf8String.length() -1; i >=0; i--) {
                         reverseString.push_back(utf8String[i]);
                     }
 
-                    cout << " " << endl;
                     cout << "Decoded UTF-8 : ";
                     cout <<  reverseString << endl;
                     printf("=================================== \n");
@@ -106,33 +120,29 @@ int file(int x){
         };    
         i++;
         if(type == false){
-            break;
+            return false;
         }
         
     }
 
             
     file.close();
-    return 1;
+    return false;
        
-
-
 }
      
   
 int main(){
    int x = 1024;
-   
-   for (int k =0 ; k < 2; k++){
-     int judge;
-    judge = file(x);
-    
-    x += 128;
-    
-   }
-    
-   
+   bool judge;
 
-
+   while(1){
+        judge = file(x);
+        if(judge){
+            break;
+        }
+        x += 128;
    }
+
+ }
 
